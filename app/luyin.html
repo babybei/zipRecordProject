@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>录音</title>
+	<title>录音测试</title>
 	<script src="http://code.enhance.cn/dist/libs/jquery/1.11.0/jquery.js"></script>
 	<script type="text/javascript" src='scripts/h5record.js'></script>
 </head>
@@ -60,18 +60,6 @@
                         }
                     }
                 });
-                /* 重新录音 */
-                $("#retry").click(function () {
-                	if (!$(this).hasClass("butInvalid")) {
-                		recorder.stopPlay(audio);
-                        $("#recording").removeClass("butInvalid");
-                        $(this).addClass("butInvalid");
-                        if ($("#play").text().indexOf("Pause") != -1) {
-                    		$("#play").text("Play");
-                        }
-                        $("#play").addClass("butInvalid");
-                    }
-                })
 			}
 		};
 		luyin.init();
