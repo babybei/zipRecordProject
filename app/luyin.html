@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>录音</title>
+	<script src="http://code.enhance.cn/dist/libs/jquery/1.11.0/jquery.js"></script>
+	<script type="text/javascript" src='scripts/h5record.js'></script>
+</head>
+<body>
+	<input type="button" style="width:150px; height: 40px; line-height: 40px;" id="recording" value="录音">
+	<input type="button" style="width:150px; height: 40px; line-height: 40px;" id="stop" value="停止">
+	<input type="button" style="width:150px; height: 40px; line-height: 40px;" id="play" value="Play">
+	<audio style="display:none;" controls autoplay></audio> 
+	<script type="text/javascript">
+	$(function(){
+		/* 音频 */  
+		var recorder;  
+		var audio = document.querySelector('audio');
+		window.luyin={
+			init:function(){
+				var self=this;
+	  			this.addListener();
+			},
+			addListener:function(){
+				$("#recording").click(function () {
+                    if (!$(this).hasClass("butInvalid")) {
+                    	HZRecorder.get(function (rec) {  
+            				recorder = rec;  
+            				recorder.start();
+                    		$('#recording').addClass("butInvalid");
+                    		$("#stop").removeClass("butInvalid");
+            			})
+                    }                    
+                });
+                $("#stop").click(function () {                    	
+                    if (!$(this).hasClass("butInvalid")) {
+                        $(this).addClass("butInvalid");
+                        $("#play").removeClass("butInvalid");
+                        /*$("#js_next").removeClass("invalid-continue");*/
+                        recorder.stop();
+                    }
+                });
+                /* 播放录音 */
+                $("#play").click(function () {
+                	if (!$(this).hasClass("butInvalid")) {
+                        $("#retry").removeClass("butInvalid");
+
+                        //if ($(this).text().indexOf("Play") != -1) {
+                    	if ($(this).val().indexOf("Play") != -1) {
+                            //$(this).text("Pause");
+                            $(this).val("Pause");
+                            recorder.play(audio); 
+//                                FWRecorder.playBack('audio');//flash
+                        //} else if ($(this).text().indexOf("Pause") != -1) {
+                    	} else if ($(this).val().indexOf("Pause") != -1) {
+                    		//$(this).text("Play");
+                    		$(this).val("Play");
+                    		recorder.stopPlay(audio);
+//                                FWRecorder.pausePlayBack('audio');//flash
+                        }
+                    }
+                });
+                /* 重新录音 */
+                $("#retry").click(function () {
+                	if (!$(this).hasClass("butInvalid")) {
+                		recorder.stopPlay(audio);
+                        $("#recording").removeClass("butInvalid");
+                        $(this).addClass("butInvalid");
+                        if ($("#play").text().indexOf("Pause") != -1) {
+                    		$("#play").text("Play");
+                        }
+                        $("#play").addClass("butInvalid");
+                    }
+                })
+			}
+		};
+		luyin.init();
+	});
+	</script>
+</body>
+</html>
