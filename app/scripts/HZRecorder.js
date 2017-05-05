@@ -1,17 +1,18 @@
 (function (window) {  
     //兼容  
     window.URL = window.URL || window.webkitURL;  
+    //请求麦克风
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;  
   
     var HZRecorder = function (stream, config) {  
-        config = config || {};  
-        config.sampleBits = config.sampleBits || 8;      //采样数位 8, 16  
-        config.sampleRate = config.sampleRate || (44100 / 6);   //采样率(1/6 44100)  
   
           
         //创建一个音频环境对象  
         audioContext = window.AudioContext || window.webkitAudioContext;  
         var context = new audioContext();  
+        config = config || {};  
+        config.sampleBits = config.sampleBits || 8;      //采样数位 8, 16  
+        config.sampleRate = config.sampleRate || (context.sampleRate / 6);   //采样率(1/6 44100)
   
         //将声音输入这个对像  
         var audioInput = context.createMediaStreamSource(stream);  
@@ -24,15 +25,15 @@
         var bufferSize = 4096;  
   
         // 创建声音的缓存节点，createScriptProcessor方法的  
-        // 第二个和第三个参数指的是输入和输出都是双声道。  
-        var recorder = context.createScriptProcessor(bufferSize, 2, 2); 
+        // 第二个和第三个参数指的是输入和输出都是双声道。
+        var recorder = context.createScriptProcessor(bufferSize, 1, 1); 
          
         //用来储存读出的麦克风数据，和压缩这些数据，将这些数据转换为WAV文件的格式
         var audioData = {  
             size: 0          //录音文件长度  
             , buffer: []     //录音缓存  
             , inputSampleRate: context.sampleRate    //输入采样率  
-            , inputSampleBits: 16       //输入采样数位 8, 16  
+            , inputSampleBits: 8       //输入采样数位 8, 16  
             , outputSampleRate: config.sampleRate    //输出采样率  
             , oututSampleBits: config.sampleBits       //输出采样数位 8, 16  
             , input: function (data) {  
@@ -122,9 +123,9 @@
         };  
   
         //开始录音  
-        this.start = function () { 
+        this.start = function () {
             audioInput.connect(recorder);  
-            recorder.connect(context.destination);  
+            recorder.connect(context.destination);
         };  
   
         //停止  
@@ -141,19 +142,18 @@
         //回放  
         this.play = function (audio) {  
             audio.src = window.URL.createObjectURL(this.getBlob());  
-        	audio.onended = function() {
-        		$('#play').text("Play");
+            audio.onended = function() {
+                $('#play').text("Play");
             };
         };  
         
         //停止播放
         this.stopPlay=function(audio){
-        	audio.pause();
+            audio.pause();
         }
   
         //上传  
         this.upload = function (url,pdata, callback) {
-        	debugger;
             var fd = new FormData();  
             fd.append('file', this.getBlob());  
             var xhr = new XMLHttpRequest();
@@ -179,31 +179,49 @@
 
 
         
-//        var c = document.getElementById("myCanvas"); //获取要操作的canvas
-//        var width = c.width,
-//        height = c.height,
-//        g = c.getContext("2d");
-//     // 将坐标原点移动到(0.5, height / 2 + 0.5)的位置
-//        g.translate(0.5, height / 2 + 0.5);
-  
+    //    var c = document.getElementById("myCanvas"); //获取要操作的canvas
+    //    var width = c.width,
+    //    height = c.height,
+    //    g = c.getContext("2d");
+    // // 将坐标原点移动到(0.5, height / 2 + 0.5)的位置
+    //    g.translate(0.5, height / 2 + 0.5);
+       var $bo=$("#inbo");
+       var $change=$("#change");
+        var width=$bo.width();
         //音频采集  
         recorder.onaudioprocess = function (e) {
-            audioData.input(e.inputBuffer.getChannelData(0)); 
+            audioData.input(e.inputBuffer.getChannelData(0));
+           //获取输入和输出的数据缓冲区
+           var input = e.inputBuffer.getChannelData(0);
+           //将输入数缓冲复制到输出缓冲上
+           // for(var i=0; i<input.length; i++)
+           // {
+           //     output[i]=input[i];
+           //     //尝试输出大于1的值
+           //     if(output[i]>=1){
+           //      console.log(output[i]);
+           //     }
+           // }
+           // //将缓冲区的数据绘制到Canvas上
+           // g.clearRect(-0.5, -height/2 - 0.5, width, height);
 
-//          //获取输入和输出的数据缓冲区
-//            var input = e.inputBuffer.getChannelData(0);
-//            var output = e.outputBuffer.getChannelData(0);
-//            //将输入数缓冲复制到输出缓冲上
-//            for(var i=0; i<input.length; i++)
-//                output[i]=input[i];
-//            //将缓冲区的数据绘制到Canvas上
-//            g.clearRect(-0.5, -height/2 - 0.5, width, height);
-//
-//            g.beginPath();
-//            for(i = 0; i < width; i++)
-//            g.lineTo(i, height / 2 * output[output.length * i / width|0]);
-//            g.stroke();
-            //record(e.inputBuffer.getChannelData(0));  
+           // g.beginPath();
+           // for(i = 0; i < width; i++)
+           // g.lineTo(i, height / 2 * output[output.length * i / width|0]);
+           // g.stroke();
+           //  //record(e.inputBuffer.getChannelData(0));  
+           //绘制条形波动图
+           for(i=0;i<width;i++){
+              var changeWidth=width/2*input[input.length*i/width|0];
+              $change.width(changeWidth);
+           }
+            var timeHidden=document.getElementById('audiolength');
+            timeHidden.Value=e.playbackTime;
+            console.log(timeHidden.Value);
+            if(timeHidden.Value>=45.4){
+                recorder.disconnect();  
+                setTimeout(saveAudio(),500);
+            }
         };  
   
     };  
@@ -218,7 +236,7 @@
         if (callback) {  
             if (navigator.getUserMedia) {  
                 navigator.getUserMedia(  
-                    { audio: true } //只启用音频  
+                    { audio: true } //只启用音频  A
                     , function (stream) {  //stream这个参数是麦克风的输入流，将这个流传递给HZRecorder
                         var rec = new HZRecorder(stream, config);  
                         callback(rec);  

@@ -1,69 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<meta charset="UTF-8">
-	<title>录音测试</title>
-	<script src="http://code.enhance.cn/dist/libs/jquery/1.11.0/jquery.js"></script>
-	<script type="text/javascript" src='scripts/HZRecorder.js'></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>录音测试</title>
+    <style type="text/css">
+    #inbo{
+        width: 500px;
+        height: 40px;
+        border: 1px solid #ccc;
+        margin-top: 20px;
+    }
+    #change{
+        height: 40px;
+        width: 0;
+        background-color: #009933;
+    }
+    </style>
 </head>
 <body>
-	<input type="button" style="width:150px; height: 40px; line-height: 40px;" id="recording" value="录音">
-	<input type="button" style="width:150px; height: 40px; line-height: 40px;" id="stop" value="停止">
-	<input type="button" style="width:150px; height: 40px; line-height: 40px;" id="play" value="Play">
-	<audio style="display:none;" controls autoplay></audio> 
-	<script type="text/javascript">
-	$(function(){
-		/* 音频 */  
-		var recorder;  
-		var audio = document.querySelector('audio');
-		window.luyin={
-			init:function(){
-				var self=this;
-	  			this.addListener();
-			},
-			addListener:function(){
-				$("#recording").click(function () {
-                    if (!$(this).hasClass("butInvalid")) {
-                    	HZRecorder.get(function (rec) {  
-            				recorder = rec;  
-            				recorder.start();
-                    		$('#recording').addClass("butInvalid");
-                    		$("#stop").removeClass("butInvalid");
-            			})
-                    }                    
-                });
-                $("#stop").click(function () {                    	
-                    if (!$(this).hasClass("butInvalid")) {
-                        $(this).addClass("butInvalid");
-                        $("#play").removeClass("butInvalid");
-                        /*$("#js_next").removeClass("invalid-continue");*/
-                        recorder.stop();
-                    }
-                });
-                /* 播放录音 */
-                $("#play").click(function () {
-                	if (!$(this).hasClass("butInvalid")) {
-                        $("#retry").removeClass("butInvalid");
+    <div>
+        <audio id="audioSave" controls autoplay style="display: none;"></audio>
+        <audio id="audioCheck" controls autoplay style="display: none;"></audio>
+        <input type="hidden" id="audiolength"> 
+        <input onclick="startRecording()" style="width:150px; height: 40px; line-height: 40px;" type="button" value="录音" />
+        <input onclick="stopRecording()" style="width:150px; height: 40px; line-height: 40px;" type="button" value="停止" />
+        <input onclick="playRecording()" style="width:150px; height: 40px; line-height: 40px;" type="button" value="播放" />
+        <input onclick="saveAudio()" style="width:150px; height: 40px; line-height: 40px;" type="button" value="保存" />
+    </div>
+    <div id="inbo">
+        <div id="change"></div>
+    </div>
+    <script src="http://code.enhance.cn/dist/libs/jquery/1.11.0/jquery.js"></script>
+    <script type="text/javascript" src="scripts/HZRecorder.js"></script>
+    <script src="scripts/FileSaver.js"></script>
 
-                        //if ($(this).text().indexOf("Play") != -1) {
-                    	if ($(this).val().indexOf("Play") != -1) {
-                            //$(this).text("Pause");
-                            $(this).val("Pause");
-                            recorder.play(audio); 
-//                                FWRecorder.playBack('audio');//flash
-                        //} else if ($(this).text().indexOf("Pause") != -1) {
-                    	} else if ($(this).val().indexOf("Pause") != -1) {
-                    		//$(this).text("Play");
-                    		$(this).val("Play");
-                    		recorder.stopPlay(audio);
-//                                FWRecorder.pausePlayBack('audio');//flash
-                        }
-                    }
-                });
-			}
-		};
-		luyin.init();
-	});
-	</script>
+    <script>
+
+        var recorder;
+
+        //var audio = document.querySelector('audio');
+        var audio = document.getElementById('audioSave');
+
+        function startRecording() {
+            HZRecorder.get(function (rec) {
+                recorder = rec;
+                recorder.start();
+                // setTimeout(function(){
+                //     recorder.stop();
+                //     setTimeout(saveAudio(),500);    
+                // },45000);
+            });
+        }
+
+        function stopRecording() {
+            recorder.stop();
+        }
+
+        function playRecording() {
+            recorder.play(audio);
+        }
+
+        function uploadAudio() {
+            recorder.upload("Handler1.ashx", function (state, e) {
+                switch (state) {
+                    case 'uploading':
+                        //var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+                        break;
+                    case 'ok':
+                        //alert(e.target.responseText);
+                        alert("上传成功");
+                        break;
+                    case 'error':
+                        alert("上传失败");
+                        break;
+                    case 'cancel':
+                        alert("上传被取消");
+                        break;
+                }
+            });
+        }
+
+        function saveAudio(){
+            saveAs(recorder.getBlob(), "example.wav");
+        }
+
+    </script>
+
 </body>
 </html>
