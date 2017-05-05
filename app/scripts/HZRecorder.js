@@ -119,7 +119,10 @@
                 }  
   
                 return new Blob([data], { type: 'audio/wav' });  
-            }  
+            } 
+            ,closeContext:function(){
+                context.close();   //关闭AudioContext否则录音多次会报错。
+            } 
         };  
   
         //开始录音  
@@ -150,6 +153,10 @@
         //停止播放
         this.stopPlay=function(audio){
             audio.pause();
+        }
+
+        this.close=function(){
+            audioData.closeContext();
         }
   
         //上传  

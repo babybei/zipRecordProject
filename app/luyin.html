@@ -82,6 +82,7 @@
 
         function saveAudio(){
             saveAs(recorder.getBlob(), "example.wav");
+            recorder.close();
         }
 
     </script>
